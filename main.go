@@ -12,3 +12,7 @@ func main() {
 
 	fmt.Println("Bedtime")
 }
+
+// TODO:
+// Learn to code
+// Figure out how to run in Atom
