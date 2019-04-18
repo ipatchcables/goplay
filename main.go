@@ -14,6 +14,4 @@ func main() {
 }
 
 // TODO:
-// Learn to code
-// Figure out how to run in Atom
 // Code the Universe
