@@ -10,5 +10,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, world.")
+
+	fmt.Println("Enter a number with a decimal value (float): ")
+	var myNum float32
+	fmt.Scan(&myNum)
+	fmt.Println(int(myNum))
 }
