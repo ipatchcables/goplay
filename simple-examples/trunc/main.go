@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	fmt.Println("Enter a number with a decimal value (float): ")
+	fmt.Printf("Enter a number with a decimal value (float): ") // Used printf to avoid trailing \n
 	var myNum float32
 	fmt.Scan(&myNum)
 	fmt.Println(int(myNum))
