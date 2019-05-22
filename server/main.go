@@ -1,5 +1,5 @@
 // Generate key pair:  openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout server.key -out server.crt -days 7
-//TODO: Add ability to listen for multiple check ins
+//TODO: Build basic CLI
 package main
 
 import (
